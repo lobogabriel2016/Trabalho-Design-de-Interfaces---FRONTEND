@@ -1,0 +1,137 @@
+====================================================================
+RESUMO DA PARTICIPAÇÃO — Gabriel (Papel #8: Frontend — Formulário)
+1ª Etapa — Trabalho Bimestral: CRUD de Cadastro (Marca)
+====================================================================
+
+TAREFA DESIGNADA: Tela de cadastro de Marca — Reactive Forms +
+validação, envio bloqueado quando inválido, Toast de feedback e
+layout Bootstrap + PrimeNG (papel #8, branch feature/front-formulario,
+conforme divisão da seção 9.1 da documentação).
+
+A minha participação se dividiu em DUAS FASES: (1) construção completa
+da tela em ambiente local, com todos os testes; (2) análise da master
+do grupo, identificação de um defeito real de estilização e correção
+via Pull Request.
+
+--------------------------------------------------------------------
+FASE 1 — CONSTRUÇÃO DA TELA (ambiente local)
+--------------------------------------------------------------------
+
+1. ARQUIVOS QUE CRIEI (do zero)
+
+1.1 src/app/pages/marca/marca-cadastro/marca-cadastro.component.ts
+    - Componente STANDALONE de cadastro com Reactive Forms
+    - Validators: nome (obrigatório, mín. 2, máx. 120 caracteres) e
+      cnpj (obrigatório, 14 dígitos numéricos)
+    - Trim dos valores antes do envio (regra 5.4 da documentação)
+    - Chamada ao service para POST /api/marcas
+    - Toast de sucesso/erro via MessageService (PrimeNG)
+    - Botão travado enquanto envia; formulário reiniciado após salvar
+
+1.2 src/app/pages/marca/marca-cadastro/marca-cadastro.component.html
+    - Formulário com grid Bootstrap (container/row/col)
+    - Inputs do PrimeNG (pInputText, pButton)
+    - Mensagens de erro POR CAMPO (só quando tocado/inválido)
+    - Envio bloqueado com [disabled]="form.invalid || enviando"
+
+1.3 src/app/core/services/marca.service.ts
+    - Service de comunicação com o backend — único lugar com
+      HttpClient (regra 5.4)
+    - inserir() -> POST /api/marcas
+    - listar()  -> GET /api/marcas?filtro=  (top 10 alfabético)
+    - URL base vinda do environment
+
+1.4 src/environments/environment.development.ts
+    - apiUrl: 'http://localhost:8080/api' para o modo dev (contrato
+      da seção 6.1)
+
+2. ARQUIVOS QUE MODIFIQUEI NA MINHA VERSÃO
+
+2.1 src/app/app.routes.ts — rota de cadastro + redirect da raiz
+2.2 src/app/app.html — substituição do placeholder por
+    <router-outlet /> para as rotas renderizarem
+2.3 src/styles.css — imports do Bootstrap e PrimeIcons
+2.4 package.json — dependência de temas do PrimeNG
+
+OBSERVAÇÃO DE BOA PRÁTICA: o arquivo core/models/marca.model.ts já
+existia (criado pelo colega Luiz, papel #7). Adaptei meu código ao
+contrato dele (interface MarcaCadastro), respeitando a divisão de
+papéis — não sobrescrevi trabalho alheio.
+
+3. PROBLEMAS TÉCNICOS DIAGNOSTICADOS E RESOLVIDOS
+
+1) NG2008 — stylesheet do componente ausente -> arquivo recriado
+2) TS2339 — 'apiUrl' sem tipagem no environment de dev -> corrigido
+3) NG0201 — 'No provider found for MessageService' -> providers
+   adicionados no componente
+4) Botão sem rótulo — API do PrimeNG 22 não aceita mais 'label' no
+   <button pButton> -> texto movido para dentro do elemento
+5) Tela branca — rota registrada mas sem <router-outlet /> -> ajustado
+6) Formulário sem estilos — Bootstrap/PrimeNG não eram carregados no
+   build (styles.css vazio) -> CSS global + tema configurados
+
+4. VALIDAÇÕES E TESTES REALIZADOS (FASE 1)
+
+[X] ng serve compilando sem erros; app no ar em localhost:4200
+[X] Tela acessível em /marcas/novo (e redirect da raiz)
+[X] Envio bloqueado com campos vazios + mensagens de erro por campo
+[X] Botão habilita somente com nome válido + CNPJ de 14 dígitos
+[X] Toast de erro exibido com backend desligado ('Failed to Fetch'),
+    comprovando o comportamento exigido (erros nunca são silenciados,
+    tabela 6.3 da documentação)
+
+--------------------------------------------------------------------
+FASE 2 — ANÁLISE DA MASTER DO GRUPO E CONTRIBUIÇÃO REAL
+--------------------------------------------------------------------
+
+Ao subir minha versão para o repositório do grupo, identifiquei que a
+master já havia evoluído (PRs #4 a #7 do time backend mergeados e uma
+implementação da tela de cadastro feita por colegas). NÃO sobrescrevi
+o trabalho existente e redirecionei minha contribuição para um defeito
+real que encontrei na master:
+
+DEFEITO IDENTIFICADO:
+- O src/styles.css da master estava vazio: o Bootstrap e o PrimeIcons
+  NUNCA eram carregados no build, embora o HTML da tela de cadastro
+  dependa deles (classes row/col/card/text-danger do grid Bootstrap e
+  ícone 'pi pi-check' do PrimeIcons no botão). Resultado: a tela
+  renderizava sem o layout esperado.
+
+CORREÇÃO PROPRIAMENTE MINHA (via PR):
+- Import de 'bootstrap/dist/css/bootstrap.min.css' e
+  'primeicons/primeicons.css' no styles.css
+- Branch: feature/front-formulario
+- Commit: 'fix(front): importa Bootstrap e PrimeIcons no styles.css
+  (grid e icones nao eram carregados)'
+- Fluxo completo: clone do repo -> branch a partir da master ->
+  commit -> push -> Pull Request (seção 7 da documentação; push
+  direto na master é proibido)
+
+VALIDAÇÃO DO DEFEITO:
+[X] Comparação arquivo a arquivo entre minha versão e a master
+[X] Estilos carregando corretamente na minha versão local após os
+    imports (formulário estilizado: grid centralizado, campos com
+    borda/largura, botão estilizado)
+
+--------------------------------------------------------------------
+PENDÊNCIAS
+--------------------------------------------------------------------
+
+- [ ] Teste ponta a ponta com o backend real no ar (:8080) —
+      dependente do time backend (checklist 6.5)
+- [ ] Aprovação do PR pelo validador (Ryquelme, papel #1)
+- [ ] Alinhamento no grupo sobre a convergência das duas
+      implementações da tela (minha versão local vs. versão da
+      master)
+
+--------------------------------------------------------------------
+RESUMO EM UMA FRASE
+--------------------------------------------------------------------
+
+Construí do zero a tela de cadastro de Marca (componente standalone,
+Reactive Forms com validação de nome e CNPJ, integração com a API via
+service, Toast de feedback e estilização), resolvendo seis problemas
+técnicos no processo; e, ao analisar a master do grupo, identifiquei e
+corrigi via Pull Request um defeito real (Bootstrap e PrimeIcons não
+carregados), respeitando o trabalho dos colegas e o fluxo de PRs
+exigido pela documentação.

@@ -1,0 +1,64 @@
+<p-toast />
+
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+
+      <h2 class="mt-4 mb-4 text-center">Cadastro de Marca</h2>
+
+      <form [formGroup]="form" (ngSubmit)="enviar()">
+
+        <div class="mb-3">
+          <label for="nome" class="form-label">Nome / Razão social *</label>
+          <input
+            pInputText
+            id="nome"
+            formControlName="nome"
+            class="w-100"
+            placeholder="Ex.: Companhia Bebidas LTDA" />
+          @if (erroNome()) {
+            <small class="text-danger">
+              @if (form.controls.nome.hasError('required')) {
+                O nome é obrigatório.
+              } @else if (form.controls.nome.hasError('minlength')) {
+                Mínimo de 2 caracteres.
+              } @else {
+                Máximo de 120 caracteres.
+              }
+            </small>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label for="cnpj" class="form-label">CNPJ *</label>
+          <input
+            pInputText
+            id="cnpj"
+            formControlName="cnpj"
+            class="w-100"
+            maxlength="14"
+            placeholder="Somente números (14 dígitos)" />
+          @if (erroCnpj()) {
+            <small class="text-danger">
+              @if (form.controls.cnpj.hasError('required')) {
+                O CNPJ é obrigatório.
+              } @else {
+                O CNPJ deve ter 14 dígitos numéricos.
+              }
+            </small>
+          }
+        </div>
+
+        <button
+  pButton
+  type="submit"
+  class="w-100 mt-2"
+  [disabled]="form.invalid || enviando">
+  {{ enviando ? 'Salvando...' : 'Cadastrar' }}
+</button>
+
+      </form>
+
+    </div>
+  </div>
+</div>
